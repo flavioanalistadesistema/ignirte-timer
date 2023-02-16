@@ -1,5 +1,5 @@
 import { ThemeProvider } from 'styled-components'
-import { Router } from './component/Router'
+import { Router } from '../Router'
 import { GlobolStyled } from './styles/global'
 
 import { BrowserRouter } from 'react-router-dom'
