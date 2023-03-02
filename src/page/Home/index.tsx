@@ -1,5 +1,7 @@
 import { Play } from 'phosphor-react'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as zod from 'zod'
 
 import {
   FormContainer,
@@ -11,11 +13,31 @@ import {
   MinutAmountInput,
 } from './styles'
 
+const schema = zod.object({
+  minutAmount: zod
+    .number()
+    .min(10, 'Ciclo deve ser minimo de 11 minutos')
+    .max(60, 'Ciclo deve ser maximo 60 minutos'),
+  task: zod
+    .string()
+    .min(2, 'Titulo deve ser de no minimut 2 caracteres')
+    .max(10, 'Titulo deve ser de no máximo 10 caracteres'),
+})
+
 export function Home() {
-  const { register, handleSubmit, watch } = useForm()
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(schema),
+  })
+
   const handleCreatedNewCicle = (data: any) => {
-    console.log(data)
+    console.log('teste aqui')
   }
+  console.log(errors)
 
   const task = watch('task')
   const isDisableTask = !task
@@ -31,6 +53,7 @@ export function Home() {
             placeholder="Dê um nome ao seu projeto"
             {...register('task')}
           />
+          {errors.task?.message && <p>{errors.task?.message}</p>}
 
           <label htmlFor="minutAmount">durante</label>
           <MinutAmountInput
@@ -39,6 +62,7 @@ export function Home() {
             placeholder="00"
             {...register('minutAmount', { valueAsNumber: true })}
           />
+          {errors.minutAmount?.message && <p>{errors.minutAmount?.message}</p>}
 
           <span>minutos.</span>
         </FormContainer>
