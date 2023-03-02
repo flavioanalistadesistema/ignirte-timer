@@ -24,18 +24,26 @@ const schema = zod.object({
     .max(10, 'Titulo deve ser de no máximo 10 caracteres'),
 })
 
+type NewCicleFormData = zod.infer<typeof schema>
+
 export function Home() {
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm({
+    reset,
+  } = useForm<NewCicleFormData>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      task: '',
+      minutAmount: 0,
+    },
   })
 
-  const handleCreatedNewCicle = (data: any) => {
-    console.log('teste aqui')
+  const handleCreatedNewCicle = (data: NewCicleFormData) => {
+    console.log(data)
+    reset()
   }
   console.log(errors)
 
