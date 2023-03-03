@@ -64,9 +64,17 @@ export function Home() {
     reset()
   }
 
-  const isCycleActive = cycle.find((cycle) => cycle.id === activeCycleId)
+  const activeCycle = cycle.find((cycle) => cycle.id === activeCycleId)
+  const [amountSecondsPassed, setAmountsecondsPassed] = useState(0)
 
-  console.log('cycle', isCycleActive)
+  const totalSeconds = activeCycle ? activeCycle.minutAmount * 60 : 0
+  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
+
+  const amountMinutes = Math.floor(currentSeconds / 60)
+  const amountSeconds = currentSeconds % 60
+
+  const minutes = String(amountMinutes).padStart(2, '0')
+  const seconds = String(amountSeconds).padStart(2, '0')
 
   const task = watch('task')
   const isDisableTask = !task
@@ -97,11 +105,11 @@ export function Home() {
         </FormContainer>
 
         <CountdownContainer>
-          <span>0</span>
-          <span>0</span>
+          <span>{minutes[0]}</span>
+          <span>{minutes[1]}</span>
           <Separetor>:</Separetor>
-          <span>0</span>
-          <span>0</span>
+          <span>{seconds[0]}</span>
+          <span>{seconds[1]}</span>
         </CountdownContainer>
         <StartCountDownButton disabled={isDisableTask} type="submit">
           <Play size={24} />
