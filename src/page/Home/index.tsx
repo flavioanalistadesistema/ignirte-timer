@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { Play } from 'phosphor-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import * as zod from 'zod'
+import { differenceInSeconds } from 'date-fns'
 
 import {
   FormContainer,
@@ -31,6 +32,7 @@ interface Cycle {
   id: string
   task: string
   minutAmount: number
+  date: Date
 }
 
 export function Home() {
@@ -50,6 +52,8 @@ export function Home() {
 
   const [cycle, setCycle] = useState<Cycle[]>([])
   const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+  const activeCycle = cycle.find((cycle) => cycle.id === activeCycleId)
+  const [amountSecondsPassed, setAmountsecondsPassed] = useState(0)
 
   const handleCreatedNewCicle = (data: NewCicleFormData) => {
     const id = String(new Date().getTime())
@@ -58,14 +62,27 @@ export function Home() {
       id,
       task: data.task,
       minutAmount: data.minutAmount,
+      date: new Date(),
     }
     setCycle((state) => [...state, newCycle])
     setActiveCycleId(id)
+    setAmountsecondsPassed(0)
     reset()
   }
 
-  const activeCycle = cycle.find((cycle) => cycle.id === activeCycleId)
-  const [amountSecondsPassed, setAmountsecondsPassed] = useState(0)
+  useEffect(() => {
+    let interval: number
+    if (activeCycle) {
+      interval = setInterval(() => {
+        setAmountsecondsPassed(
+          differenceInSeconds(new Date(), activeCycle.date),
+        )
+      }, 1000)
+    }
+    return () => {
+      clearInterval(interval)
+    }
+  }, [activeCycle])
 
   const totalSeconds = activeCycle ? activeCycle.minutAmount * 60 : 0
   const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
@@ -78,6 +95,12 @@ export function Home() {
 
   const task = watch('task')
   const isDisableTask = !task
+
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `${minutes}: ${seconds}`
+    }
+  }, [minutes, seconds, activeCycle])
 
   return (
     <HomeContainer>
