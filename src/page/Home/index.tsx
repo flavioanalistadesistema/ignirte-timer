@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { Play } from 'phosphor-react'
+import { HandPalm, Play } from 'phosphor-react'
 import { useEffect, useState } from 'react'
 import * as zod from 'zod'
 import { differenceInSeconds } from 'date-fns'
@@ -13,6 +13,7 @@ import {
   StartCountDownButton,
   TaskInput,
   MinutAmountInput,
+  StoptCountDownButton,
 } from './styles'
 
 const schema = zod.object({
@@ -33,6 +34,7 @@ interface Cycle {
   task: string
   minutAmount: number
   date: Date
+  interrupted: Date
 }
 
 export function Home() {
@@ -55,6 +57,18 @@ export function Home() {
   const activeCycle = cycle.find((cycle) => cycle.id === activeCycleId)
   const [amountSecondsPassed, setAmountsecondsPassed] = useState(0)
 
+  const totalSeconds = activeCycle ? activeCycle.minutAmount * 60 : 0
+  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
+
+  const amountMinutes = Math.floor(currentSeconds / 60)
+  const amountSeconds = currentSeconds % 60
+
+  const minutes = String(amountMinutes).padStart(2, '0')
+  const seconds = String(amountSeconds).padStart(2, '0')
+
+  const task = watch('task')
+  const isDisableTask = !task
+
   const handleCreatedNewCicle = (data: NewCicleFormData) => {
     const id = String(new Date().getTime())
 
@@ -68,6 +82,19 @@ export function Home() {
     setActiveCycleId(id)
     setAmountsecondsPassed(0)
     reset()
+  }
+
+  function handleInterruptedcycles() {
+    setCycle(
+      cycle.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, interrupted: new Date() }
+        } else {
+          return cycle
+        }
+      }),
+    )
+    setActiveCycleId(null)
   }
 
   useEffect(() => {
@@ -84,18 +111,6 @@ export function Home() {
     }
   }, [activeCycle])
 
-  const totalSeconds = activeCycle ? activeCycle.minutAmount * 60 : 0
-  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
-
-  const amountMinutes = Math.floor(currentSeconds / 60)
-  const amountSeconds = currentSeconds % 60
-
-  const minutes = String(amountMinutes).padStart(2, '0')
-  const seconds = String(amountSeconds).padStart(2, '0')
-
-  const task = watch('task')
-  const isDisableTask = !task
-
   useEffect(() => {
     if (activeCycle) {
       document.title = `${minutes}: ${seconds}`
@@ -110,16 +125,24 @@ export function Home() {
           <TaskInput
             type="text"
             id="task"
+            list="task-options"
             placeholder="Dê um nome ao seu projeto"
+            disabled={!!activeCycle}
             {...register('task')}
           />
           {errors.task?.message && <p>{errors.task?.message}</p>}
+
+          <datalist id="task-options">
+            <option value="Projeto 1" />
+            <option value="Projeto 2" />
+          </datalist>
 
           <label htmlFor="minutAmount">durante</label>
           <MinutAmountInput
             type="number"
             id="minutAmount"
             placeholder="00"
+            disabled={!!activeCycle}
             {...register('minutAmount', { valueAsNumber: true })}
           />
           {errors.minutAmount?.message && <p>{errors.minutAmount?.message}</p>}
@@ -134,10 +157,18 @@ export function Home() {
           <span>{seconds[0]}</span>
           <span>{seconds[1]}</span>
         </CountdownContainer>
-        <StartCountDownButton disabled={isDisableTask} type="submit">
-          <Play size={24} />
-          Começar
-        </StartCountDownButton>
+
+        {activeCycle ? (
+          <StoptCountDownButton onClick={handleInterruptedcycles} type="button">
+            <HandPalm size={24} />
+            Interromper
+          </StoptCountDownButton>
+        ) : (
+          <StartCountDownButton disabled={isDisableTask} type="submit">
+            <Play size={24} />
+            Começar
+          </StartCountDownButton>
+        )}
       </form>
     </HomeContainer>
   )
