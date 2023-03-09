@@ -19,7 +19,7 @@ import {
 const schema = zod.object({
   minutAmount: zod
     .number()
-    .min(10, 'Ciclo deve ser minimo de 11 minutos')
+    .min(1, 'Ciclo deve ser minimo de 1 minutos')
     .max(60, 'Ciclo deve ser maximo 60 minutos'),
   task: zod
     .string()
@@ -34,7 +34,8 @@ interface Cycle {
   task: string
   minutAmount: number
   date: Date
-  interrupted: Date
+  interrupDate: Date
+  finishedDate: Date
 }
 
 export function Home() {
@@ -88,7 +89,7 @@ export function Home() {
     setCycle(
       cycle.map((cycle) => {
         if (cycle.id === activeCycleId) {
-          return { ...cycle, interrupted: new Date() }
+          return { ...cycle, interrupDate: new Date() }
         } else {
           return cycle
         }
@@ -101,15 +102,32 @@ export function Home() {
     let interval: number
     if (activeCycle) {
       interval = setInterval(() => {
-        setAmountsecondsPassed(
-          differenceInSeconds(new Date(), activeCycle.date),
+        const secondsDiferents = differenceInSeconds(
+          new Date(),
+          activeCycle.date,
         )
+
+        if (secondsDiferents >= totalSeconds) {
+          setCycle((status) =>
+            status.map((cycle) => {
+              if (cycle.id === activeCycleId) {
+                return { ...cycle, finishedDate: new Date() }
+              } else {
+                return cycle
+              }
+            }),
+          )
+          setAmountsecondsPassed(totalSeconds)
+          clearInterval(interval)
+        } else {
+          setAmountsecondsPassed(secondsDiferents)
+        }
       }, 1000)
     }
     return () => {
       clearInterval(interval)
     }
-  }, [activeCycle])
+  }, [activeCycle, totalSeconds, activeCycleId])
 
   useEffect(() => {
     if (activeCycle) {
