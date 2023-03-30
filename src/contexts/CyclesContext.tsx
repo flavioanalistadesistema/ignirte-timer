@@ -50,6 +50,7 @@ export function CycleContextProvider({ children }: CycleContextProviderProps) {
         }
       }),
     )
+    setActiveCycleId(null)
   }
 
   const createdNewCicleContext = (data: CycleFormDataType) => {
