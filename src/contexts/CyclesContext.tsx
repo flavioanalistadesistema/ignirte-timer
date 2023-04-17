@@ -38,32 +38,40 @@ export const CycleContext = createContext({} as CycleContextType)
 export function CycleContextProvider({ children }: CycleContextProviderProps) {
   const [cycleState, dispatch] = useReducer(
     (state: CycleState, action: any) => {
-      console.log(state)
-      console.log(action)
-
-      if (action.type === 'CREATED_NEW_CYCLE_CONTEXT') {
-        return {
-          ...state,
-          cycles: [...state.cycles, action.payload.newCycle],
-          activeCycleId: action.payload.newCycle.id,
-        }
+      switch (action.type) {
+        case 'CREATED_NEW_CYCLE_CONTEXT':
+          return {
+            ...state,
+            cycles: [...state.cycles, action.payload.newCycle],
+            activeCycleId: action.payload.newCycle.id,
+          }
+        case 'INTERRUPTED_CYCLES_CONTEXT':
+          return {
+            ...state,
+            cycles: state.cycles.map((cycle) => {
+              if (cycle.id === state.activeCycleId) {
+                return { ...cycle, interrupDate: new Date() }
+              } else {
+                return cycle
+              }
+            }),
+            activeCycleId: null,
+          }
+        case 'MARK_CURRENT_CYCLE_AS_FINISHED':
+          return {
+            ...state,
+            cycles: state.cycles.map((cycle) => {
+              if (cycle.id === state.activeCycleId) {
+                return { ...cycle, finishedDate: new Date() }
+              } else {
+                return cycle
+              }
+            }),
+            activeCycleId: null,
+          }
+        default:
+          return state
       }
-
-      if (action.type === 'INTERRUPTED_CYCLES_CONTEXT') {
-        return {
-          ...state,
-          cycles: state.cycles.map((cycle) => {
-            if (cycle.id === state.activeCycleId) {
-              return { ...cycle, interrupDate: new Date() }
-            } else {
-              return cycle
-            }
-          }),
-          activeCycleId: null,
-        }
-      }
-
-      return state
     },
     {
       cycles: [],
@@ -86,16 +94,6 @@ export function CycleContextProvider({ children }: CycleContextProviderProps) {
         activeCycleId,
       },
     })
-    // setCycle((status) =>
-    //   status.map((cycle) => {
-    //     if (cycle.id === activeCycleId) {
-    //       return { ...cycle, finishedDate: new Date() }
-    //     } else {
-    //       return cycle
-    //     }
-    //   }),
-    // )
-    // setActiveCycleId(null)
   }
 
   const createdNewCicleContext = (data: CycleFormDataType) => {
@@ -114,8 +112,6 @@ export function CycleContextProvider({ children }: CycleContextProviderProps) {
         newCycle,
       },
     })
-    // setCycle((state) => [...state, newCycle])
-    setAmountsecondsPassed(0)
   }
 
   function interruptedCyclesContext() {
