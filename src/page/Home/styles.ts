@@ -52,3 +52,11 @@ export const StoptCountDownButton = styled(BasicCountDownButton)`
     background: ${(props) => props.theme['red-700']};
   }
 `
+
+export const LinkRepository = styled.a`
+  color: ${(props) => props.theme['green-300']};
+  display: flex;
+  align-items: center;
+  margin-top: 2rem;
+  padding: 5px 10px;
+`
