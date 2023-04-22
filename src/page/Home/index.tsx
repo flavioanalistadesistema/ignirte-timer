@@ -5,6 +5,7 @@ import * as zod from 'zod'
 
 import {
   HomeContainer,
+  LinkRepository,
   StartCountDownButton,
   StoptCountDownButton,
 } from './styles'
@@ -68,6 +69,10 @@ export function Home() {
           </StartCountDownButton>
         )}
       </form>
+
+      <LinkRepository href="https://github.com/flavioanalistadesistema/ignirte-timer">
+        Repositório do projeto
+      </LinkRepository>
     </HomeContainer>
   )
 }
