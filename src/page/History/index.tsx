@@ -5,7 +5,7 @@ import { CycleContext } from '../../contexts/CyclesContext'
 import { HistoryContainer, HistoryList, Status } from './styles'
 
 export function History() {
-  const { cycle } = useContext(CycleContext)
+  const { cycles } = useContext(CycleContext)
 
   return (
     <HistoryContainer>
@@ -21,14 +21,14 @@ export function History() {
             </tr>
           </thead>
           <tbody>
-            {cycle.map((cycle) => {
+            {cycles.map((cycle) => {
               return (
                 <>
                   <tr key={cycle.id}>
                     <td>{cycle.task}</td>
                     <td>{cycle.minutAmount}</td>
                     <td>
-                      {formatDistanceToNow(cycle.date, {
+                      {formatDistanceToNow(new Date(cycle.date), {
                         addSuffix: true,
                         locale: ptBR,
                       })}
